@@ -1,75 +1,12 @@
-# Here's the updated script with improved readability, modularity, simplicity, and DRY:
-
-# ```python
-
-
 import os
 import openai
 import json
-import json
 import os
 from datetime import datetime, timedelta
-
-
 from plugins.config.config_env import OPENAI_API_KEY
-
 import asyncio
 import functools
-import time
 import random
-
-# make this work inside a discord bot make it modular so the image generation is importable
-
-
-# To make the given code work inside a Discord bot, you'll need the `discord.py` library. First, you'll need to install it using pip:
-
-# ```bash
-# pip install discord.py
-# ```
-
-# Then, you can create a new file called `image_generation.py` and place the following code in it:
-
-# ```python
-# image_generation.py
-# import base64
-# import os
-# import requests
-# from io import BytesIO
-# from PIL import Image
-
-# api_host = os.getenv('API_HOST', 'https://api.stability.ai')
-# api_key = os.getenv("STABILITY_API_KEY")
-
-# if api_key is None:
-#     raise Exception("Missing Stability API key.")
-
-# engine_id = "stable-diffusion-v1-5"
-
-
-# ```
-
-# Finally, make sure that the `DISCORD_BOT_TOKEN` environment variable is set with your bot token from the Discord Developer Portal. Then, run the `bot.py` file:
-
-# ```bash
-# python bot.py
-# ```
-
-# Now you have a Discord bot that generates images based on user inputs, given as `!generate <prompt>` in a Discord text channel. The `generate_image` function is importable, allowing you to reuse the code easily.
-
-
-# if response.status_code != 200:
-#     raise Exception("Non-200 response: " + str(response.text))
-
-# data = response.json()
-
-# for i, image in enumerate(data["artifacts"]):
-#     with open(f"./out/v1_txt2img_{i}.png", "wb") as f:
-#         f.write(base64.b64decode(image["base64"]))
-
-
-import json
-import os
-from datetime import datetime
 
 
 def store_json(json_obj):
@@ -298,11 +235,11 @@ async def async_gpt_response(model, prompt, max_tokens, **kwargs):
     )
 
     response_data = {
-        "request":{
-        "prompt": prompt,
-        "model": model,
-        "max_tokens": max_tokens,
-        **kwargs
+        "request": {
+            "prompt": prompt,
+            "model": model,
+            "max_tokens": max_tokens,
+            **kwargs,
         },
         "response": response,
     }
@@ -338,21 +275,6 @@ async def async_generate_chat_completion(
     )
 
 
-# async def async_generate_chat_completion(prompt, context='', system_role='You are a helpful assistant.', model='gpt-3.5-turbo', max_tokens= 200, **kwargs):
-#     if isinstance(prompt, list):
-#         response = await async_gpt_response(model=model, prompt=prompt, max_tokens=max_tokens, **kwargs)
-#         return response['choices'][0]['message']['content']
-
-#     prompt_with_context = f'```\n{context}\n```\n\nPrompt: {prompt}\n\n' if context else prompt
-#     prompt = [{'role': 'system', 'content': system_role},
-#                 {'role': 'user', 'content': prompt_with_context}]
-
-#     response = await async_gpt_response(model=model, prompt=prompt, max_tokens=max_tokens, **kwargs)
-#     return response['choices'][0]['message']['content']
-
-
-
-
 def transcribe_audio(file_path, model="whisper-1"):
     with open(file_path, "rb") as audio_file:
         transcript = openai.Audio.transcribe(model, audio_file)
@@ -364,50 +286,3 @@ def generate_text_embedding(text):
 
     vector = embedding["data"][0]["embedding"]
     return vector
-
-
-# ```
-
-# better function name?
-
-
-def _create_variation(filepath):
-    response = openai.Image.create_variation(
-        image=open(filepath, "rb"),
-        n=1,
-        size="256x256",
-    )
-    img_url = response["data"][0]["url"]
-    return img_url
-
-
-def _create_image(prompt):
-    response = openai.Image.create(prompt=prompt, n=1, size="256x256")
-    img_url = response["data"][0]["url"]
-    return img_url
-
-
-# @bot.command(name="create", help="Create image from text description")
-# async def create_image(ctx, *, prompt):
-#     response = openai.Image.create(prompt=prompt, n=2, size="1024x1024")
-#     img_url = response["data"][0]["url"]
-
-#     channel = discord.utils.get(ctx.guild.text_channels, name="create_image_channel")
-#     await channel.send(f"Generated image for {prompt}:", files=[discord.File(fp=img_url)])
-
-# # Set OpenAI API key
-# OPENAI_API_KEY = read_api_key(
-#     '/Users/work/Documents/nextjs-gpt3-api/api/openai_api_key.json')
-# set_openai_api_key(OPENAI_API_KEY)
-
-# Usage examples
-# text_embeddings = get_embeddings(["text1", "text2"])
-# completion_result = generate_completion("This is a test")
-# chat_result = generate_chat_completion("Hello there", "You are a helpful assistant.")
-# audio_transcript = transcribe_audio("path/to/audio/file.wav")
-# ```
-
-# In this updated version, we've created smaller functions for specific tasks, reducing the amount of code duplication and making the code more modular and easier to read. The functions are now designed to return results directly, allowing for more flexible usage. The file also includes usage examples for each function.
-
-
-# <<>>
