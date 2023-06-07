@@ -2,17 +2,13 @@ import datetime
 from io import BytesIO
 import os
 import tempfile
-
 import discord
 import requests
-
 from plugins.formatting import format_response_py_v2
 from plugins.reader import reader
 from plugins.vector_store import chroma_manager
 from functools import wraps
 from typing import Callable, Any
-
-
 
 
 def save_output_file(reply):
@@ -88,19 +84,6 @@ def enforce_types(func: Callable) -> Callable:
 
     return wrapper
 
-
-def format_reply(reply, description, user_message):
-    if len(reply) >= 2000:
-        # description = description if description else 'Long message sent as a file:'
-        description = (
-            description
-            if description
-            else f"{user_message.author.mention} Long message sent as a file:"
-        )
-        file = create_discord_file(reply)
-        return description, file
-    else:
-        return reply, None
 
 async def process_attachments(attachments, collection=None, db=None):
     content = ""

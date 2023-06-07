@@ -3,11 +3,9 @@ from discord.ext import commands
 from llm.interfaces.utills import (
     create_discord_file,
     enforce_types,
-    format_reply,
     process_attachments,
 )
 from plugins.config.config_env import OPENAI_API_KEY
-
 
 
 class UserSettings:
@@ -18,7 +16,6 @@ class UserSettings:
         self.response_type = "reply/mention"
         self.response_locations = "any"
         self.auto_thread_creation = True
-        self.thinking_message = True
         self.format_response = None
         self.ephemeral = True
 
@@ -30,7 +27,6 @@ class UserSettings:
             "response_type": self.response_type,
             "response_locations": self.response_locations,
             "auto_thread_creation": self.auto_thread_creation,
-            "thinking_message": self.thinking_message,
             "format_response": self.format_response,
             "ephemeral": self.ephemeral,
         }
@@ -48,15 +44,18 @@ class DiscordHandler(commands.Bot):
 
     @enforce_types
     async def on_message(self, message):
+        if not isinstance(message, discord.message.Message):
+            return
         if message.author.bot or not self.assistant_enabled:
             return
         if not OPENAI_API_KEY:
-            return await message.channel.send("It seems like the 'OPENAI_API_KEY' has not been set. Please set the 'OPENAI_API_KEY' in your environment variables and restart the application.")
+            return await message.channel.send(
+                "It seems like the 'OPENAI_API_KEY' has not been set. Please set the 'OPENAI_API_KEY' in your environment variables and restart the application."
+            )
         if message.content.startswith("."):
             return
         if message.content.startswith(("!", "/")):
             return await self.process_commands(message)
-
 
         if self.only_owner and not self.is_owner(message):
             return
@@ -65,22 +64,23 @@ class DiscordHandler(commands.Bot):
             return
 
         try:
-            if isinstance(message, discord.message.Message):
-                return await self.handle_regular_message(message)
-            else:
-                return await self.handle_slash_message(message)
+            return await self.handle_regular_message(message)
         except:
-            return await message.channel.send("Oops! An unexpected error occurred on our end 🤔. We apologize for the inconvenience. Please try again.")
+            return await message.channel.send(
+                "Oops! An unexpected error occurred on our end 🤔. We apologize for the inconvenience. Please try again."
+            )
 
     async def on_ready(self):
-        print(f"Logged in as {self.assistant.user.name} (ID {self.assistant.user.id})")
-
-        # print(f"{self.user.name} has connected to Discord!")
+        print(f"============================================")
+        print(f"   Successfully logged in as {self.assistant.user.name}")
+        print(f"             ID: {self.assistant.user.id}")
+        print(f"============================================")
         app_info = await self.application_info()
         self.user_id = app_info.owner.id
-        print(f"Bot is ready, and the owner ID is: {self.user_id}")
+        print(f"🚀 Bot is now ready to use!")
+        print(f"👤 Owner ID: {self.user_id}")
         synced = await self.tree.sync()
-        print(f"'/' commands synced: {len(synced)} commands.")
+        print(f"- Successfully synced {len(synced)} command(s) in the '/' directory.")
 
     def is_thread(self, user_message):
         return user_message.channel.type in (
@@ -91,7 +91,7 @@ class DiscordHandler(commands.Bot):
     @enforce_types
     async def send_response(
         self,
-        assistant_message: discord.message.Message,
+        message: discord.message.Message,
         content: str,
         description: str = "",
         reply_as_file: str = "",
@@ -101,18 +101,14 @@ class DiscordHandler(commands.Bot):
         if new_thread:
             response_action = new_thread.send
             if reply_as_file:
-                await response_action(
+                return await response_action(
                     content=f"{mention} {description}",
                     file=reply_as_file if reply_as_file else None,
                 )
             else:
-                await response_action(content=f"{mention} {content}")
-
-            if self.thinking_message:
-                return await assistant_message.delete()
-
+                return await response_action(content=f"{mention} {content}")
         else:
-            response_action = assistant_message.edit
+            response_action = message.reply
 
             if reply_as_file:
                 return await response_action(
@@ -122,9 +118,7 @@ class DiscordHandler(commands.Bot):
                 return await response_action(content=content)
 
     async def handle_regular_message(self, message):
-        if self.thinking_message:
-            assistant_message = await message.reply(":cloud: Let me think...")
-
+        await message.channel.typing()
         reply = await self.generate_reply(message)
         reply = reply[0]
         description, file = self.format_reply(reply)
@@ -133,20 +127,13 @@ class DiscordHandler(commands.Bot):
         if not self.is_thread(message):
             new_thread = await self.create_thread(message, reply)
 
-        await self.send_response(
-            assistant_message,
+        return await self.send_response(
+            message,
             reply,
             description=description,
             reply_as_file=file,
             new_thread=new_thread,
             mention=f"{message.author.mention}",
-        )
-
-    async def handle_slash_message(self, message):
-        reply = await self.generate_reply(message)
-        updated_reply, reply_as_file = format_reply(reply)
-        return await self.send_response(
-            message, updated_reply, reply_as_file=reply_as_file
         )
 
     async def generate_reply(self, message):
@@ -211,11 +198,7 @@ class DiscordHandler(commands.Bot):
         reply = (
             " ".join(reply.split()[:20]) + "..." if len(reply.split()) > 20 else reply
         )
-
         text = f"User: {msg}\nAssitant: {reply}\n"
-
-        print(text)
-
         description = (await self.generate_description(text))[:100]
         result_thread = await user_message.channel.create_thread(
             name=description, message=user_message
