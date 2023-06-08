@@ -1,5 +1,5 @@
 import os
-from discord_bot.utils.setup_handler import SetupHandler
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
 from plugins.ocr.ocr import ocr_fn
 
 

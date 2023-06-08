@@ -1,5 +1,5 @@
-from discord_bot.utils.utils import create_usage_embed
-from discord_bot.utils.setup_handler import SetupHandler
+from interfaces.discord_bot.utils.utils import create_usage_embed
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
 import os
 
 

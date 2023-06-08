@@ -1,7 +1,7 @@
 import discord
 from io import BytesIO
 from PIL import Image
-from discord_bot.utils.setup_handler import SetupHandler
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
 from plugins.img_gen.automatic1111_api import TextToImage, save_image
 
 
@@ -9,23 +9,7 @@ text_to_image = TextToImage("")
 
 
 class TextToImagePlugin(SetupHandler):
-    def setup(self):
-        @self.assistant.tree.command(name="set_gradio_url")
-        async def set_gradio_url(interaction, url: str):
-            text_to_image.set_url(url)
-
-        @self.assistant.command(
-            name="create", help="Create image from text description"
-        )
-        def get_engine_name(engine_id):
-            for key, value in STABILITY_AI_CHOICES.items():
-                if value == engine_id:
-                    if "xl" in key:
-                        return "XL-beta"
-                    return key
-            return "Unknown"
-
-        STABILITY_AI_CHOICES = {
+    STABILITY_AI_CHOICES = {
             "1": "stable-diffusion-v1",
             "1-5": "stable-diffusion-v1-5",
             "2": "stable-diffusion-512-v2-0",
@@ -34,6 +18,20 @@ class TextToImagePlugin(SetupHandler):
             "2-1-768": "stable-diffusion-768-v2-1",
             "xl-beta": "stable-diffusion-xl-beta-v2-2-2",
         }
+
+    def setup(self):
+        @self.assistant.tree.command(name="set_gradio_url")
+        async def set_gradio_url(interaction, url: str):
+            text_to_image.set_url(url)
+
+        def get_engine_name(engine_id):
+            for key, value in self.STABILITY_AI_CHOICES.items():
+                if value == engine_id:
+                    if "xl" in key:
+                        return "XL-beta"
+                    return key
+            return "Unknown"
+
 
         @self.assistant.command()
         async def dreamai(ctx, engine_alias: str = None, *, prompt="_"):

@@ -1,7 +1,7 @@
 import json
 import os
 import pathlib
-from discord_bot.utils.setup_handler import SetupHandler
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
 from llm.openai.gpt_api import calculate_usage
 import discord
 import importlib.util

@@ -25,7 +25,7 @@ class GPTCLI(ABC):
         # Display help message for available commands
         print("Type your message or use the following commands:")
         print("/help - to display this help message")
-        print("/quit - to exit the CLI")
+        print("/q - to exit the CLI")
 
         print()
 

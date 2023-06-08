@@ -1,8 +1,8 @@
 import threading
-from discord_bot.utils.setup_handler import SetupHandler
-from llm.interfaces.telegram_interface import TelegramHandler
-from llm.interfaces.text_cli import GPTCLI
-from llm.interfaces.discord_interface import DiscordHandler
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
+from interfaces.telegram_interface import TelegramHandler
+from interfaces.text_cli import GPTCLI
+from interfaces.discord_interface import DiscordHandler
 from llm.utils.utils import sanitize_output
 from .openai.gpt_api import async_generate_chat_completion
 

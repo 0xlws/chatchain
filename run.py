@@ -1,4 +1,4 @@
-from discord_bot.utils.utils import load_handlers
+from interfaces.discord_bot.utils.utils import load_handlers
 from llm.assistant import AIAssistant
 
 assistant = AIAssistant()

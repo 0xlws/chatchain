@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from llm.interfaces.utills import (
+from interfaces.utills import (
     create_discord_file,
     enforce_types,
     process_attachments,

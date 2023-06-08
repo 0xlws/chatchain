@@ -1,7 +1,7 @@
 import json
 from typing import List
 import discord
-from discord_bot.utils.setup_handler import SetupHandler
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
 from plugins.config.config_env import OPENAI_API_KEY
 
 

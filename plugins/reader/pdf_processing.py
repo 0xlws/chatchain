@@ -1,7 +1,7 @@
 import PyPDF2
 import requests
 import io
-from discord_bot.utils.setup_handler import SetupHandler
+from interfaces.discord_bot.utils.setup_handler import SetupHandler
 
 
 class FileReaderPlugin(SetupHandler):
