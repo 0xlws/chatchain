@@ -1,13 +1,8 @@
 import discord
 from io import BytesIO
-import requests
 from PIL import Image
-import requests
 from discord_bot.utils.setup_handler import SetupHandler
 from plugins.img_gen.automatic1111_api import TextToImage, save_image
-from llm.openai.gpt_api import (
-    _create_image,
-)
 
 
 text_to_image = TextToImage("")
@@ -22,16 +17,6 @@ class TextToImagePlugin(SetupHandler):
         @self.assistant.command(
             name="create", help="Create image from text description"
         )
-        async def __create_image(ctx, *, prompt):
-            img_url = _create_image(prompt)
-            response = requests.get(img_url)
-            image_data = BytesIO(response.content)
-
-            await ctx.send(
-                f"Generated image for {prompt}:",
-                files=[discord.File(fp=image_data, filename="image.png")],
-            )
-
         def get_engine_name(engine_id):
             for key, value in STABILITY_AI_CHOICES.items():
                 if value == engine_id:

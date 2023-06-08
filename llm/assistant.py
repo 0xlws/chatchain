@@ -1,20 +1,16 @@
+import threading
 from discord_bot.utils.setup_handler import SetupHandler
-
+from llm.interfaces.telegram_interface import TelegramHandler
 from llm.interfaces.text_cli import GPTCLI
-from llm.interfaces.discord_interface import DiscordHandler, UserSettings
+from llm.interfaces.discord_interface import DiscordHandler
 from llm.utils.utils import sanitize_output
-
 from .openai.gpt_api import async_generate_chat_completion
 
 
-class AIAssistant(DiscordHandler, UserSettings, GPTCLI, SetupHandler):
-    def __init__(self, command_prefix=None, intents=None):
-        if command_prefix and intents:
-            DiscordHandler.__init__(
-                self, command_prefix=command_prefix, intents=intents
-            )
-            SetupHandler.__init__(self, self)
-            UserSettings.__init__(self, self.owner_id)
+class AIAssistant(GPTCLI, SetupHandler):
+    def __init__(self):
+        self.discord_bot = DiscordHandler(self)
+        self.telegram_bot = TelegramHandler(self)
 
         self.model = "gpt-4"
         self.temperature = 1
@@ -73,5 +69,13 @@ class AIAssistant(DiscordHandler, UserSettings, GPTCLI, SetupHandler):
             print(e)
             return ""
 
+    def run(self):
+        # Create threads for each bot's run method
+        discord_thread = threading.Thread(target=self.discord_bot._run)
 
-assistant = AIAssistant()
+        # Start the threads
+        discord_thread.start()
+        try:
+            self.telegram_bot._run()
+        finally:
+            discord_thread.join()

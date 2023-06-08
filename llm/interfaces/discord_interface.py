@@ -5,14 +5,14 @@ from llm.interfaces.utills import (
     enforce_types,
     process_attachments,
 )
-from plugins.config.config_env import OPENAI_API_KEY
+from plugins.config.config_env import DISCORD_BOT_TOKEN, OPENAI_API_KEY
 
 
 class UserSettings:
     def __init__(self, user_id):
         self.user_id = user_id
         self.assistant_enabled = True
-        self.only_owner = False
+        self.only_owner = True
         self.response_type = "reply/mention"
         self.response_locations = "any"
         self.auto_thread_creation = True
@@ -34,10 +34,22 @@ class UserSettings:
         return settings
 
 
-class DiscordHandler(commands.Bot):
-    def __init__(self, command_prefix, intents):
-        if command_prefix and intents:
-            super().__init__(command_prefix=command_prefix, intents=intents)
+intents = discord.Intents.default()
+intents.message_content = True
+intents.reactions = True
+intents.messages = True
+intents.guilds = True
+intents.voice_states = True
+
+
+class DiscordHandler(commands.Bot, UserSettings):
+    def __init__(self, assistant, command_prefix="!", intents=intents):
+        self.assistant = assistant
+        commands.Bot.__init__(self, command_prefix=command_prefix, intents=intents)
+        UserSettings.__init__(self, self.owner_id)
+
+    def _run(self):
+        super().run(DISCORD_BOT_TOKEN)
 
     def is_owner(self, message):
         return message.author.id == self.user_id
@@ -72,13 +84,13 @@ class DiscordHandler(commands.Bot):
 
     async def on_ready(self):
         print(f"============================================")
-        print(f"   Successfully logged in as {self.assistant.user.name}")
-        print(f"             ID: {self.assistant.user.id}")
+        print(f"   Successfully logged in as {self.user.name}")
+        print(f"             ID: {self.user.id}")
         print(f"============================================")
         app_info = await self.application_info()
         self.user_id = app_info.owner.id
-        print(f"🚀 Bot is now ready to use!")
-        print(f"👤 Owner ID: {self.user_id}")
+        print(f"🚀 Discord bot is now ready to use!")
+        print(f"👤 Discord bot owner ID: {self.user_id}")
         synced = await self.tree.sync()
         print(f"- Successfully synced {len(synced)} command(s) in the '/' directory.")
 
@@ -141,7 +153,7 @@ class DiscordHandler(commands.Bot):
             return await self.process_attachment_message(message)
         if message.reference:
             return await self.process_reference_message(message)
-        return await self.code(message.content)
+        return await self.assistant.code(message.content)
 
     def format_reply(self, reply: str, description: str = ""):
         if len(reply) >= 2000:
@@ -174,7 +186,7 @@ class DiscordHandler(commands.Bot):
             if user_message.attachments
             else None
         )
-        return await self.code(user_message.content, context=content)
+        return await self.assistant.code(user_message.content, context=content)
 
     async def process_reference_message(self, user_message):
         replied_msg = await user_message.channel.fetch_message(
@@ -190,7 +202,7 @@ class DiscordHandler(commands.Bot):
             if content
             else f"Assistant: {replied_msg.content}\nUser: {user_message.content}\nAssistant: "
         )
-        return await self.code(prompt)
+        return await self.assistant.code(prompt)
 
     async def create_thread(self, user_message, reply):
         msg = user_message.content
@@ -199,7 +211,7 @@ class DiscordHandler(commands.Bot):
             " ".join(reply.split()[:20]) + "..." if len(reply.split()) > 20 else reply
         )
         text = f"User: {msg}\nAssitant: {reply}\n"
-        description = (await self.generate_description(text))[:100]
+        description = (await self.assistant.generate_description(text))[:100]
         result_thread = await user_message.channel.create_thread(
             name=description, message=user_message
         )

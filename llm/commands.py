@@ -6,18 +6,20 @@ from plugins.config.config_env import OPENAI_API_KEY
 
 
 user_config = {
-        "model": "gpt4",
-        "prompt": "",
-        "context": "",
-        "temperature": 1.0,
-        "max_tokens": 100,
-        "n": 1,
-    }
- 
+    "model": "gpt4",
+    "prompt": "",
+    "context": "",
+    "temperature": 1.0,
+    "max_tokens": 100,
+    "n": 1,
+}
+
+
 class LLMCommands(SetupHandler):
     def setup(self):
         if not OPENAI_API_KEY:
             return
+
         @self.assistant.tree.command(name="preferences")
         async def prefs(
             ctx,
@@ -78,4 +80,3 @@ class LLMCommands(SetupHandler):
                 for choice in choices
                 if current.lower() in choice.lower()
             ]
-

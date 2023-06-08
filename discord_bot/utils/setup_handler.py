@@ -4,4 +4,4 @@ class SetupHandler:
         self.setup()
 
     def setup(self):
-        pass  
+        pass

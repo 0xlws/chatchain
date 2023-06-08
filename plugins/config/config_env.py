@@ -17,7 +17,7 @@ API_SECRET_KEY = get_env_var("API_SECRET_KEY")
 BEARER_TOKEN = get_env_var("BEARER_TOKEN")
 
 # Discord
-BOT_TOKEN = get_env_var("BOT_TOKEN")
+DISCORD_BOT_TOKEN = get_env_var("DISCORD_BOT_TOKEN")
 
 # SD_AUTOMATIC1111
 GRADIO_URL = "https://23a69d47-5e38-4ldf.gradio.live"
@@ -32,3 +32,7 @@ OPENAI_API_KEY = get_env_var("OPENAI_API_KEY")
 
 # Dreamstudio
 DREAMSTUDIO_API_KEY = get_env_var("DREAMSTUDIO_API_KEY")
+
+# Telegram
+TELEGRAM_BOT_TOKEN = get_env_var("TELEGRAM_BOT_TOKEN")
+TELEGRAM_OWNER_ID = get_env_var("TELEGRAM_OWNER_ID")

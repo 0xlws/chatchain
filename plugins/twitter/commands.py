@@ -1,4 +1,3 @@
-import os
 from plugins.twitter.twitter import custom_tweet, tweet_img
 
 

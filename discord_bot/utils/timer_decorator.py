@@ -1,6 +1,7 @@
 import time
 from functools import wraps
 
+
 def timer_decorator(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -12,6 +13,7 @@ def timer_decorator(func):
         return result
 
     return wrapper
+
 
 def async_timer_decorator(func):
     @wraps(func)
